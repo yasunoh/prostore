@@ -51,10 +51,10 @@ export const config = {
             email: credentials.email as string
           }
         });
-        console.log(user)
+        // console.log(user)
         // check if user exists and if the password matches
         if(user && user.password) {
-          console.log(user.password, credentials.password)
+          // console.log(user.password, credentials.password)
           const isMatch = compareSync(credentials.password as string, user.password);
 
           // If password is correct, return user
@@ -77,6 +77,8 @@ export const config = {
     async session({ session, token, user, trigger }: any) {
       // Set the user ID from the token
       session.user.id = token.sub;
+      session.user.role = token.role
+      session.user.name = token.name
 
       // If there is an update, set the user name
       if(trigger === 'update') {
@@ -85,6 +87,24 @@ export const config = {
 
       return session
     },
+    async jwt({ token, user } :any) {
+      // Assign user fields to token
+      if(user) {
+        token.role = user.role;
+
+        // if user has no name then use the email
+        if(user.name === 'NO_NAME') {
+          token.name = user.email!.split('@')[0]
+
+          // Update database to reflect the token name
+          await prisma.user.update({
+            where: {id: user.id},
+            data: {name:token.name}
+          })          
+        }
+      }
+      return token
+    }    
   }  
 } satisfies NextAuthConfig;
 
