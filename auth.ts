@@ -1,10 +1,10 @@
 import NextAuth from 'next-auth'
-import {PrismaAdapter} from '@auth/prisma-adapter'
 import {prisma} from '@/db/prisma'
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthConfig } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { compare } from './lib/encrypt'
+import { authConfig } from './auth.config'
 
 export const config = {
   pages: {
@@ -15,11 +15,11 @@ export const config = {
     // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
   },
   session: {
-    strategy: "jwt",  
+    strategy: "jwt" as const,  
     // Seconds - How long until an idle session expires and is no longer valid.
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  adapter: PrismaAdapter(prisma),
+  // adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       // The name to display on the sign in form (e.g. 'Sign in with...')
@@ -75,6 +75,7 @@ export const config = {
     })    
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async session({ session, token, user, trigger }: any) {
       // Set the user ID from the token
       session.user.id = token.sub;
@@ -105,31 +106,7 @@ export const config = {
         }
       }
       return token
-    }  ,
-    authorized({ request }: any) {
-      // Check for session cart cookie
-      if(!request.cookies.get('sessionCartId')) {
-        // Generate new session cart id cookie
-        const ssessionCartId = crypto.randomUUID()
-
-        // Clone the req headers
-        const newRequestHeaders = new Headers(request.headers);
-        // Create new response and add the new headers
-        const response = NextResponse.next({
-          request: {
-            headers: newRequestHeaders
-          }
-        })
-
-        // Set newly generated sessionCartId in the response cookies
-        response.cookies.set('sessionCartId', ssessionCartId)
-
-        return response;
-      } else {
-        return true;
-      }
-
-    }  
+    },
   }  
 } satisfies NextAuthConfig;
 
