@@ -2,7 +2,6 @@ import NextAuth from 'next-auth'
 import {prisma} from '@/db/prisma'
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthConfig } from 'next-auth'
-import { NextResponse } from 'next/server'
 import { compare } from './lib/encrypt'
 import { authConfig } from './auth.config'
 import { cookies } from 'next/headers'
@@ -90,7 +89,7 @@ export const config = {
 
       return session
     },
-    async jwt({ token, user, trigger } :any) {
+    async jwt({ token, user, trigger, session } :any) {
       // Assign user fields to token
       if(user) {
         token.id = user.id
@@ -131,6 +130,12 @@ export const config = {
           }
         }
       }
+
+      // Handle session updates
+      if(session?.user.name && trigger === 'update') {
+        token.name = session.user.name;
+      }
+
       return token
     },
   }  

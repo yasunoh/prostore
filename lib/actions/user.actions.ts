@@ -8,7 +8,6 @@ import { formatError } from "../utils";
 import { hash } from "../encrypt";
 import { ShippingAddress } from "@/types";
 import { z } from "zod";
-import { Session } from "next-auth";
 
 // Sign in the user with credentials
 export async function signInWithCredentials(
@@ -129,5 +128,33 @@ export async function updateUserPaymentMethod(data: z.infer<typeof paymentMethod
 
   } catch (error) {
     return {success:false, Message: formatError(error)}
+  }
+}
+
+// Update the user profile
+export async function updateProfile(user: {name:string, email:string}) {
+  try {
+    const session = await auth();
+    
+    const currentUser = await prisma.user.findFirst({
+      where: {id: session?.user?.id}
+    });
+
+    if(!currentUser) throw new Error('User not found');
+
+    await prisma.user.update({
+      where: {id: currentUser.id},
+      data: {
+        name: user.name,
+      }
+    });
+
+    return {
+      success: true,
+      message: 'User updated successfully',
+    }
+
+  } catch (error) {
+    return {success: false, message: formatError(error)}
   }
 }
