@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ControllerRenderProps, useForm, SubmitHandler } from "react-hook-form"
+import { useForm, SubmitHandler } from "react-hook-form"
 import { z } from "zod"
 import {
   Form,
@@ -14,10 +14,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader } from "lucide-react";
-import CheckoutSteps from "@/components/shared/checkout-steps";
 import { paymentMethodSchema } from "@/lib/validators";
 import { DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS } from "@/lib/constants";
 import { updateUserPaymentMethod } from "@/lib/actions/user.actions";
