@@ -19,7 +19,7 @@ export const metadata:Metadata = {
   title: 'Admin Users'
 }
 
-export const AdminUserPage = async(props: {
+const AdminUserPage = async(props: {
   searchParams: Promise<{
     page:string;
     query:string;
